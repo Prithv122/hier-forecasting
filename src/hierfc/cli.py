@@ -35,11 +35,15 @@ def library_versions() -> dict[str, str]:
     return versions
 
 
-def git_commit() -> str | None:
-    """Current commit of the project checkout, or None when git is unavailable."""
+# Untracked paths under these folders are run output and downloaded data, not code changes.
+IGNORED_UNTRACKED = ("results/", "results-smoke/", "data/")
+
+
+def _git_output(*args: str) -> str | None:
+    """Stdout of ``git <args>`` run in the project checkout, or None when git is unavailable."""
     try:
         done = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
+            ["git", *args],
             capture_output=True,
             text=True,
             timeout=10,
@@ -48,7 +52,31 @@ def git_commit() -> str | None:
         )
     except (OSError, subprocess.SubprocessError):
         return None
-    return done.stdout.strip() or None
+    return done.stdout
+
+
+def git_commit() -> str | None:
+    """Current commit of the project checkout, or None when git is unavailable."""
+    out = _git_output("rev-parse", "HEAD")
+    return (out or "").strip() or None
+
+
+def git_dirty() -> bool | None:
+    """Whether the checkout has uncommitted changes to code; None when git is unavailable.
+
+    Untracked files under ``results/``, ``results-smoke/`` and ``data/`` do not count.
+    """
+    out = _git_output("status", "--porcelain")
+    if out is None:
+        return None
+    for line in out.splitlines():
+        if not line.strip():
+            continue
+        path = line[3:].strip().replace("\\", "/")
+        if line.startswith("??") and path.startswith(IGNORED_UNTRACKED):
+            continue
+        return True
+    return False
 
 
 def spec_values(n_origins: int, forecasters: Sequence[str], reconcilers: Sequence[str]) -> dict:
@@ -102,6 +130,9 @@ def cmd_backtest(args: argparse.Namespace) -> int:
     name = SMOKE if args.smoke else args.dataset
     if name is None:
         raise SystemExit("backtest needs --dataset or --smoke")
+    # Record the code that runs: the state at the start, not whatever HEAD is when it finishes.
+    commit_start = git_commit()
+    dirty = git_dirty()
     n_origins = SMOKE_ORIGINS if args.smoke else spec.N_ORIGINS
     forecasters = args.forecasters or (SMOKE_FORECASTERS if args.smoke else spec.FORECASTERS)
     reconcilers = args.reconcilers or spec.RECONCILERS
@@ -124,6 +155,12 @@ def cmd_backtest(args: argparse.Namespace) -> int:
     out.mkdir(parents=True, exist_ok=True)
     scores.to_csv(out / "scores.csv", index=False)
     forecasts.to_csv(out / "forecasts.csv.gz", index=False)
+    commit_end = git_commit()
+    if commit_end != commit_start:
+        _log(
+            f"warning: HEAD changed during the run ({commit_start} -> {commit_end}); "
+            "git_commit is the commit the run started from"
+        )
     meta: dict[str, Any] = {
         "dataset": name,
         "data": provenance,
@@ -137,9 +174,12 @@ def cmd_backtest(args: argparse.Namespace) -> int:
         },
         "diagnostics": diagnostics,
         "versions": library_versions(),
-        "git_commit": git_commit(),
+        "git_commit": commit_start,
+        "git_dirty": dirty,
         "spec": spec_values(n_origins, forecasters, reconcilers),
     }
+    if commit_end != commit_start:
+        meta["git_commit_end"] = commit_end
     (out / "meta.json").write_text(json.dumps(meta, indent=2, default=str), encoding="utf-8")
     _log(f"wrote scores.csv, forecasts.csv.gz, meta.json to {out}")
     return 0

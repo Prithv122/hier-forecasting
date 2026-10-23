@@ -162,3 +162,68 @@ def test_generate_writes_bottom_and_keys(tmp_path):
     assert list(bottom.columns) == ["unique_id", "ds", "y"]
     assert list(keys.columns) == list(spec.SYNTH_LEVELS[1:])
     assert len(keys) == bottom["unique_id"].nunique() == 8
+
+
+def _porcelain(monkeypatch, text):
+    monkeypatch.setattr(cli, "_git_output", lambda *args: text)
+
+
+def test_git_dirty_flags_code_changes_and_ignores_run_output(monkeypatch):
+    _porcelain(monkeypatch, "")
+    assert cli.git_dirty() is False
+    _porcelain(monkeypatch, "?? results/synth-smoke/scores.csv\n?? data/tourism.zip\n")
+    assert cli.git_dirty() is False
+    _porcelain(monkeypatch, " M src/hierfc/metrics.py\n")
+    assert cli.git_dirty() is True
+    _porcelain(monkeypatch, "?? results/a.csv\n?? scratch.py\n")
+    assert cli.git_dirty() is True
+    # a tracked file that lives under results/ still counts as a change
+    _porcelain(monkeypatch, " M results/REPORT.md\n")
+    assert cli.git_dirty() is True
+
+
+def test_git_helpers_tolerate_git_being_absent(monkeypatch):
+    def no_git(*args, **kwargs):
+        raise FileNotFoundError("git")
+
+    monkeypatch.setattr(cli.subprocess, "run", no_git)
+    assert cli.git_commit() is None
+    assert cli.git_dirty() is None
+
+
+def _run_smoke(tmp_path):
+    code = cli.main(["backtest", "--smoke", "--forecasters", "snaive", "--out", str(tmp_path)])
+    assert code == 0
+    return json.loads((tmp_path / "synth-smoke" / "meta.json").read_text(encoding="utf-8"))
+
+
+def test_meta_records_the_commit_the_run_started_from(monkeypatch, tmp_path, capsys):
+    pytest.importorskip("hierfc.synth")
+    heads = iter(["a" * 40, "b" * 40])  # start, then end: a commit landed during the run
+    monkeypatch.setattr(cli, "git_commit", lambda: next(heads))
+    monkeypatch.setattr(cli, "git_dirty", lambda: True)
+    meta = _run_smoke(tmp_path)
+    assert meta["git_commit"] == "a" * 40
+    assert meta["git_commit_end"] == "b" * 40
+    assert meta["git_dirty"] is True
+    assert "HEAD changed during the run" in capsys.readouterr().err
+
+
+def test_meta_has_no_end_commit_when_head_is_stable(monkeypatch, tmp_path, capsys):
+    pytest.importorskip("hierfc.synth")
+    monkeypatch.setattr(cli, "git_commit", lambda: "c" * 40)
+    monkeypatch.setattr(cli, "git_dirty", lambda: False)
+    meta = _run_smoke(tmp_path)
+    assert meta["git_commit"] == "c" * 40
+    assert meta["git_dirty"] is False
+    assert "git_commit_end" not in meta
+    assert "HEAD changed" not in capsys.readouterr().err
+
+
+def test_meta_without_git_stores_none(monkeypatch, tmp_path):
+    pytest.importorskip("hierfc.synth")
+    monkeypatch.setattr(cli, "git_commit", lambda: None)
+    monkeypatch.setattr(cli, "git_dirty", lambda: None)
+    meta = _run_smoke(tmp_path)
+    assert meta["git_commit"] is None and meta["git_dirty"] is None
+    assert "git_commit_end" not in meta
