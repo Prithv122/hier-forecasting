@@ -306,3 +306,21 @@ def test_series_bootstrap_matches_an_independent_cluster_resample():
     assert res["lo"] == pytest.approx(lo)
     assert res["hi"] == pytest.approx(hi)
     assert res["n_series"] == 12 and res["n_pairs"] == 45
+
+
+def test_floating_point_noise_is_not_a_difference() -> None:
+    """Amendment A2: a no-op reconciler's ~1e-15 differences read as no clear difference."""
+    from hierfc.metrics import paired_bootstrap
+
+    rows = []
+    for i in range(10):
+        for o in range(3):
+            base = 1.0 + 0.1 * i
+            for rec, val in (("base", base), ("ols", base + 1e-15)):
+                rows.append((f"2020-0{o + 1}-01", "f", rec, f"s{i}", "lv", val, val))
+    scores = pd.DataFrame(
+        rows, columns=["origin", "forecaster", "reconciler", "unique_id", "level", "mase", "rmsse"]
+    )
+    out = paired_bootstrap(scores, candidate=("f", "ols"), reference=("f", "base"), level="lv")
+    assert out["mean"] == 0.0 and out["lo"] == 0.0 and out["hi"] == 0.0
+    assert out["verdict"] == "no clear difference"

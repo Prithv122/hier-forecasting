@@ -22,6 +22,10 @@ from hierfc.contracts import DS, ID, YHAT, Hierarchy, to_matrix
 
 SCORE_COLUMNS = ["origin", "forecaster", "reconciler", ID, "level", "mase", "rmsse"]
 VERDICTS = ("better", "worse", "no clear difference")
+# Paired differences smaller than this are floating-point noise from a reconciler that leaves the
+# forecast unchanged (e.g. any projection of already-coherent seasonal-naive forecasts) and are set
+# to exactly 0, so the noise cannot produce a "better"/"worse" reading (Amendment A2).
+NUMERIC_TOL = 1e-9
 
 
 def scales(y_train: np.ndarray, season: int = spec.SEASON) -> tuple[Any, Any]:
@@ -139,7 +143,8 @@ def paired_differences(
     both = pd.concat([pick(candidate), pick(reference)], axis=1, join="inner").dropna()
     if both.empty:
         raise ValueError(f"no paired scores for {candidate} vs {reference} at level {level!r}")
-    return both.iloc[:, 0] - both.iloc[:, 1]
+    d = both.iloc[:, 0] - both.iloc[:, 1]
+    return d.mask(d.abs() < NUMERIC_TOL, 0.0)
 
 
 def _bootstrap_means(

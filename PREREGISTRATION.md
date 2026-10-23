@@ -141,3 +141,16 @@ H3 would have mixed two effects.
 Full backtests had been started on all three datasets before this amendment, into a scratch
 directory outside the repo, to check run time. Their scores were not opened and are discarded. All
 reported results come from runs at or after the commit that adds this amendment.
+
+### A2 — 2026-10-23, after the results were read (reporting only)
+
+The first report labelled some descriptive cells "better" or "worse" with an estimate and interval
+of +0.000 [+0.000, +0.000]. These are reconcilers that leave a forecast unchanged (any projection
+of the already-coherent seasonal-naive forecasts; top-down at the total level), where the paired
+differences are floating-point noise of about 1e-15. The smallest real difference in the H1 data
+is 5e-5.
+
+**Change:** paired differences with |d| < 1e-9 are set to exactly 0 before the bootstrap
+(`metrics.NUMERIC_TOL`). Regenerating the report from the same score files changed only those
+no-op cells, all to "no clear difference". **The H1–H3 sections are byte-identical to the first
+report.** No backtest was re-run; the score files are the ones produced at `3739dad`.
