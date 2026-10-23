@@ -11,7 +11,7 @@ Form: **action → technical specifics → measured outcome.**
   found MinT reconciliation made the national total 9% worse (MASE 0.990 → 1.083, 95% CI
   +0.042 to +0.147) while improving regions by under 1%.
 - Implemented bottom-up, top-down, OLS, WLS and MinT-shrink reconciliation from the linear algebra
-  (Schäfer–Strimmer covariance shrinkage), matching Nixtla's `hierarchicalforecast` to 4e-9, with a
+  (Schäfer–Strimmer covariance shrinkage), matching Nixtla's `hierarchicalforecast` to 1e-8 (asserted in tests), with a
   leakage test that scrambles all post-origin data and requires byte-identical forecasts.
 - Built a seeded synthetic hierarchy that isolates error correlation; an independent review caught
   a confound in it (unequal noise persistence), fixed by a logged amendment before any result was

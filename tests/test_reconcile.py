@@ -260,4 +260,4 @@ def test_matches_hierarchicalforecast_mint_shrink() -> None:
         y_hat_insample=np.zeros_like(inp["residuals"]),
     )["mean"]
     out = reconcile(inp["base"], h, "mint_shrink", residuals=inp["residuals"])
-    np.testing.assert_allclose(out, ref, rtol=1e-6, atol=1e-6)
+    np.testing.assert_allclose(out, ref, rtol=0, atol=1e-8)

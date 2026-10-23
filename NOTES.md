@@ -22,7 +22,7 @@ Working notes: what broke, what I tried, why X over Y.
   so every reconciler applies without grouped-structure extensions.
 - **Shrinkage convention:** centred residuals, covariance / (T−1), lambda from standardised
   residuals. Matches `hierarchicalforecast` 1.5.3 to ~1e-8 relative in lambda; MinT results agree to
-  3.7e-9. Its NaN path uses pairwise-complete data; ours drops whole time points with any NaN, as
+  3.7e-9 (the test asserts 1e-8 absolute). Its NaN path uses pairwise-complete data; ours drops whole time points with any NaN, as
   pre-registered, so the two differ only when residuals have gaps.
 - **LightGBM threads:** `n_jobs=4` was ~30× slower than `n_jobs=1` on small fits under load and not
   needed for reproducibility; fixed at 1. Parallelism belongs across origins.

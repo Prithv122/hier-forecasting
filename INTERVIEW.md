@@ -22,7 +22,7 @@ Because the reconcilers are what the study is about. Every one of them is `G = (
 with a different `W`, or a fixed `G` for bottom-up and top-down, so it is about 150 lines including
 the Schäfer–Strimmer shrinkage. Writing them out meant I could test the properties that matter:
 coherence, MinT with `W = I` equals OLS, projections leave coherent input unchanged. I kept the
-library as a test-only cross-check: all five methods agree, MinT to 4e-9. The one place they
+library as a test-only cross-check: all five methods agree, and the tests assert MinT-shrink to 1e-8. The one place they
 legitimately differ is missing residuals: the library uses pairwise-complete covariance, and I drop
 whole time points, as pre-registered.
 

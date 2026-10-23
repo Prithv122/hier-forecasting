@@ -65,7 +65,7 @@ flowchart LR
 
 | Decision | Chose | Over | Why |
 |---|---|---|---|
-| Reconciliation code | Own `G`-matrix linear algebra (~150 lines) | `hierarchicalforecast` at run time | The methods are the subject of the study, so they are written out and tested; the library is kept as a test-only cross-check (all five agree to 1e-6 in the tests; MinT to 4e-9 in practice) |
+| Reconciliation code | Own `G`-matrix linear algebra (~150 lines) | `hierarchicalforecast` at run time | The methods are the subject of the study, so they are written out and tested; the library is kept as a test-only cross-check (the tests assert agreement for all five: 1e-6 relative, and MinT-shrink to 1e-8 absolute) |
 | H1's candidate | MinT-shrink, fixed in advance | "Best of the five reconcilers" (the approved brief) | Choosing the best on the same origins the interval is computed on biases the test towards success. Logged as a deviation in `PREREGISTRATION.md` §7 |
 | Error metric | MASE per level, RMSSE as a check | MAPE, or one pooled number | Tourism regions have zero months, which breaks MAPE; aggregates are orders of magnitude larger than leaves, so a pooled score is just the total's score |
 | Bootstrap unit | Whole series (all origins together) | Each (series, origin) pair | Origins 3 months apart with a 12-month horizon overlap, so their errors are not independent. The total level has one series and falls back to pairs, labelled as such |
@@ -155,6 +155,9 @@ and gained about 2% at the states and zones (descriptive, not a pre-registered t
   floating-point display fix that did not touch H1–H3) after. Both are in `PREREGISTRATION.md`.
 
 ## 6. How to run
+
+Prerequisite: [uv](https://docs.astral.sh/uv/) (it installs Python 3.12 from `.python-version`). No
+environment variables, services or accounts are needed; `download` needs internet access once.
 
 ```bash
 git clone https://github.com/Prithv122/hier-forecasting.git
