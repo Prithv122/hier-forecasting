@@ -43,6 +43,7 @@ class ETSForecaster:
         yhat = _by_name(fcst, hierarchy, self.horizon)
         fit_vals = _by_name(fitted, hierarchy, T)
         bad = ~np.isfinite(yhat).all(axis=1)
+        self.n_fallback = int(bad.sum())  # reported in the backtest diagnostics
         if bad.any() and self.season <= T:
             last = hist.Y[:, -self.season :]
             yhat[bad] = last[bad][:, np.arange(self.horizon) % self.season]

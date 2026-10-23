@@ -95,6 +95,7 @@ def run_backtest(
     negatives = {f: dict.fromkeys(reconcilers, 0) for f in forecasters}
     coherence = {f: dict.fromkeys(reconcilers, 0.0) for f in forecasters}
     wall = dict.fromkeys(forecasters, 0.0)
+    fallbacks = dict.fromkeys(forecasters, 0)  # series where ETS fell back to seasonal naive
     pieces: list[pd.DataFrame] = []
 
     for i, origin in enumerate(origins, start=1):
@@ -107,6 +108,7 @@ def run_backtest(
             base, fc_ds = to_matrix(fc.forecast(h), hierarchy, "yhat")
             resid, _ = to_matrix(fc.residuals(), hierarchy, "resid")
             wall[fname] += time.perf_counter() - start
+            fallbacks[fname] += int(getattr(fc, "n_fallback", 0))
             if base.shape[1] != h or min(fc_ds) <= origin:
                 raise ValueError(f"{fname}: forecast must cover {h} steps after origin {origin}")
             ds_arr = np.tile(pd.DatetimeIndex(fc_ds).to_numpy(), hierarchy.n_nodes)
@@ -146,5 +148,6 @@ def run_backtest(
         "negative_forecasts": negatives,
         "coherence_max_error": coherence,
         "wall_seconds": wall,
+        "ets_fallback_series": fallbacks,
     }
     return forecasts, diagnostics

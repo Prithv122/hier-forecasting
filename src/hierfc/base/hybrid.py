@@ -42,6 +42,7 @@ class HybridForecaster:
     def fit(self, y_hist: pd.DataFrame, hierarchy: contracts.Hierarchy) -> HybridForecaster:
         hist = self._hist = History.from_frame(y_hist, hierarchy)
         self._ets = ETSForecaster(self.season, self.horizon).fit(y_hist, hierarchy)
+        self.n_fallback = self._ets.n_fallback
         self._scale = series_scale(hist.Y)[:, None]
         r = np.where(np.isfinite(self._ets.resid_matrix), self._ets.resid_matrix, np.nan)
         self._r = r
