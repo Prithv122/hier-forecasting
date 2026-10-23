@@ -163,7 +163,7 @@ uv sync
 uv run pytest
 ```
 
-Reproduce the study (about 1.3 MB download; the full backtest takes tens of minutes on a laptop):
+Reproduce the study (about 1.3 MB download; the tourism backtest took about an hour on a shared laptop, each synthetic arm about 25 minutes):
 
 ```bash
 uv run hier-forecast download                       # tourism archive into data/, sha256-checked
