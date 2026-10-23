@@ -43,7 +43,8 @@ linear algebra; `hierarchicalforecast` is a test-only cross-check. Tests use pyt
 | `backtest.py` | origins, per-origin fit → forecast → reconcile loop |
 | `metrics.py` | MASE, RMSSE, per-level tables, paired bootstrap |
 | `report.py` | `results/REPORT.md` with mechanical H1–H3 verdicts |
-| `data/tourism.py` | download + load the tourism hierarchy |
+| `tourism.py` | download + load the tourism hierarchy |
+| `datasets.py` | `load_dataset(name, data_dir)` for the three arms |
 | `cli.py` | `hier-forecast generate | download | backtest | reconcile | report` |
 
 ## Acceptance criteria
