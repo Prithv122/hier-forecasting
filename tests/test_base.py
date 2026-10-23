@@ -9,6 +9,7 @@ import pytest
 from hierfc import contracts, spec
 from hierfc.base import ETSForecaster, HybridForecaster, LGBMForecaster, make_forecaster
 from hierfc.base.features import (
+    DirectEnsemble,
     History,
     build_training_set,
     calendar_months,
@@ -171,8 +172,13 @@ def test_deterministic_for_fixed_seed(name, hier, hist, fitted):
 
 
 @pytest.mark.parametrize("name", spec.FORECASTERS)
-def test_post_origin_values_cannot_leak(name, hier, hist, fitted):
-    """Wild values appended after the origin are cut off before fitting and change nothing."""
+def test_same_truncated_input_gives_identical_forecast(name, hier, hist, fitted):
+    """Determinism given the same truncated input: refitting on the history cut at the origin.
+
+    This does not prove the model ignores post-origin data (the cut happens in the test, before
+    the model sees anything); the real leakage guard is tests/test_integration.py, which scrambles
+    values after the last origin and runs the full backtest.
+    """
     origin = hist["ds"].max()
     future = hist[hist["ds"] > origin - pd.DateOffset(months=12)].copy()
     future["ds"] = future["ds"] + pd.DateOffset(months=12)
@@ -246,3 +252,54 @@ def test_all_zero_series_does_not_crash(name, hier):
 def test_rejects_gappy_history(hier, hist):
     with pytest.raises(ValueError):
         SeasonalNaive().fit(hist.iloc[:-3], hier)
+
+
+def test_hybrid_forecast_is_ets_plus_scale_times_residual_prediction(
+    hier, hist, fitted, monkeypatch
+):
+    """forecast == ETS forecast + scale * ensemble prediction, with both parts stubbed."""
+    model = fitted["hybrid"]
+    h = 4
+    rng = np.random.default_rng(7)
+    ets_mat = rng.uniform(50, 150, size=(hier.n_nodes, h))
+    pred = rng.normal(0, 0.2, size=(hier.n_nodes, h))
+    monkeypatch.setattr(model._ets, "forecast_matrix", lambda steps: ets_mat[:, :steps])
+    monkeypatch.setattr(model._ens, "predict", lambda steps: pred[:, :steps])
+    got, _ = contracts.to_matrix(model.forecast(h), hier, contracts.YHAT)
+    assert np.allclose(got, ets_mat + model._scale * pred, rtol=1e-12, atol=0)
+    assert not np.allclose(got, ets_mat - model._scale * pred)
+    assert not np.allclose(got, ets_mat + pred)
+
+
+class _SpyModel:
+    """Stands in for a LightGBM regressor: records the design matrix it is asked to predict."""
+
+    def predict(self, X):
+        self.X = np.array(X)
+        return np.zeros(len(X))
+
+
+def test_prediction_design_is_anchored_at_the_last_training_month(hier, hist):
+    """Lag 0 is the value at T-1, lag j is T-1-j, month is that of origin + k, per step k."""
+    history = History.from_frame(hist, hier)
+    n_nodes, T = history.Y.shape
+    n_lags, horizon = 4, 3
+    Z = np.arange(n_nodes)[:, None] * 1000.0 + np.arange(T)[None, :]  # value encodes (node, t)
+    W = Z + 0.5  # second block, distinguishable from the first
+    months = calendar_months(history, horizon)
+    levels = level_codes(hier)
+    ens = DirectEnsemble(n_lags, horizon, seed=0).fit([Z, W], Z, months, levels)
+    ens.models = [_SpyModel() for _ in range(horizon)]
+    ens.predict(horizon)
+    origin = history.ds[-1]
+    node = np.arange(n_nodes)
+    for k in range(1, horizon + 1):
+        X = ens.models[k - 1].X
+        assert X.shape == (n_nodes, 2 * n_lags + 2)
+        for j in range(n_lags):
+            assert np.array_equal(X[:, j], Z[node, T - 1 - j])
+            assert np.array_equal(X[:, n_lags + j], W[node, T - 1 - j])
+        assert X[0, 0] == Z[0, T - 1]
+        expected_month = (origin + pd.DateOffset(months=k)).month
+        assert (X[:, 2 * n_lags] == expected_month).all()
+        assert np.array_equal(X[:, 2 * n_lags + 1], levels)
