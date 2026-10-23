@@ -121,14 +121,16 @@ barely moved the bottom level either way.
 
 Bold: interval excludes 0. Full intervals for every forecaster are in the report.
 
-- **The cost of coherence lands where the base forecast is best.** On tourism the ETS total is the
-  most accurate base forecast, and every method that leans on the bottom (bottom-up, WLS, MinT)
-  pulls it towards the noisier sum of the regions. OLS, which weights all levels equally, kept the
-  total almost intact and improved states and zones.
-- **The synthetic arms show the mirror image.** There, LightGBM's base forecast of the total was
-  poor (MASE 1.087 in `synth-independent`), and reconciliation fixed it: MinT took it to 0.625
-  (−0.462 [−0.602, −0.314]). Whether reconciliation "helps" depends on which level's base forecast
-  is weakest.
+- **The cost of coherence lands on a level whose own forecast beats the sum of its parts.** On
+  tourism the ETS forecast of the total is far better than the sum of the regional forecasts (MASE
+  0.990 vs 1.186 for bottom-up), and every method that leans on the bottom (bottom-up, WLS, MinT)
+  pulls the total towards that sum. OLS, which weights all levels equally, kept the total almost
+  intact and improved states and zones.
+- **The synthetic arms show the mirror image.** There, LightGBM's own forecast of the total was
+  worse than the sum of its bottom forecasts (MASE 1.087 vs 0.654 bottom-up in
+  `synth-independent`), and reconciliation fixed it: MinT took it to 0.625 (−0.462 [−0.602,
+  −0.314]). Whether reconciliation "helps" a level depends on whether that level's own forecast is
+  better or worse than what the rest of the hierarchy implies for it.
 - **Top-down with historical proportions was the worst method below the total** for ETS,
   LightGBM and the hybrid on every dataset (tourism ETS: +0.17 to +0.39 MASE). The one exception is
   the seasonal naive at the tourism regions, where it helped (−0.074 [−0.133, −0.010]).
