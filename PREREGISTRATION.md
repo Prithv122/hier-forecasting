@@ -113,4 +113,31 @@ reconcilers, the other three base forecasters and the two synthetic arms are rep
 
 ## Amendments
 
-_None yet._
+### A1 — 2026-10-23, before any result was read
+
+An independent code review (fresh context) found that the two synthetic configs did not differ in
+error correlation only, as §2 claims. The shared shocks were AR(1) with coefficient 0.6 but the
+idiosyncratic noise was white, so `correlated` had persistent noise (lag-1 autocorrelation 0.42)
+and `independent` did not (−0.00). Persistence affects ETS accuracy and MinT's gain on its own, so
+H3 would have mixed two effects.
+
+1. **Change:** the idiosyncratic noise is now AR(1) with the same coefficient (`shock_ar = 0.6`) as
+   the shared shocks, each with unit stationary variance. Both configs now have the same noise
+   variance and the same lag-1 autocorrelation per series (0.6) and differ only in cross-series
+   correlation. A test pins this.
+2. **Clarification, no change in behaviour:** in §3, "columns with any missing residual" means
+   *time points* at which any node's residual is missing. The `lgbm` and `hybrid` bases have no
+   residual for their first 24 months, so MinT estimates their covariance on the remaining months.
+3. **Clarification:** the shrinkage estimator centres each node's residuals and divides by T − 1
+   (the `hierarchicalforecast` convention, which the tests match). The original paper's reference
+   code uses uncentred residuals divided by T. The ETS residual means are about 2% of their sd on
+   tourism, so the difference is negligible; it is recorded rather than changed.
+4. **Clarification:** the coherence tolerance in the code is aligned with §8 (1e-8, relative to the
+   largest absolute forecast).
+5. **Known limitation, no change:** the hybrid learns ETS one-step in-sample residuals, which are
+   close to white noise when ETS fits well. H2 may therefore come out "tie" because of this design,
+   not because ML residual correction cannot help. The README will say so next to H2.
+
+Full backtests had been started on all three datasets before this amendment, into a scratch
+directory outside the repo, to check run time. Their scores were not opened and are discarded. All
+reported results come from runs at or after the commit that adds this amendment.

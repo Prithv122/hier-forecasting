@@ -47,7 +47,7 @@ class SynthConfig:
     noise_sd: float  # total sd of the noise added to each bottom series
     region_share: float  # share of noise variance from a shock shared by the whole region
     store_share: float  # share from a shock shared by the store's categories
-    shock_ar: float  # AR(1) coefficient of the shared shocks (persistence)
+    shock_ar: float  # AR(1) coefficient of every noise component (Amendment A1)
 
 
 SYNTH_CONFIGS: dict[str, SynthConfig] = {

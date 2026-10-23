@@ -3,7 +3,9 @@
 Each bottom series is ``level * trend(t) * seasonal(month) * exp(noise_t)``. The signal (level,
 trend, seasonality) is drawn from its own random stream and the noise shocks from three further
 streams, so two configs with the same seed share the signal exactly and differ only in how the
-noise variance is split between shared and idiosyncratic shocks.
+noise variance is split between shared and idiosyncratic shocks. Every noise component is AR(1)
+with the same coefficient, so each series' noise has the same variance and persistence in every
+config.
 """
 
 from __future__ import annotations
@@ -88,7 +90,9 @@ def generate(config: SynthConfig, seed: int) -> tuple[pd.DataFrame, pd.DataFrame
     rs, ss = config.region_share, config.store_share
     reg_shock = _ar1(np.random.default_rng(reg_ss), n_reg, n_t, config.shock_ar)
     sto_shock = _ar1(np.random.default_rng(sto_ss), n_reg * n_sto, n_t, config.shock_ar)
-    idio = np.random.default_rng(idio_ss).standard_normal((n_bottom, n_t))
+    # Same AR(1) persistence as the shared shocks (Amendment A1), so the configs differ in
+    # cross-series correlation only, not in how persistent each series' noise is.
+    idio = _ar1(np.random.default_rng(idio_ss), n_bottom, n_t, config.shock_ar)
     noise = config.noise_sd * (
         np.sqrt(rs) * reg_shock[region]
         + np.sqrt(ss) * sto_shock[store]

@@ -28,10 +28,12 @@ the regions people actually staff?**
 | Size | 228 months, 1998-01 to 2016-12 | 144 months, two configs |
 | Licence | Upstream content is CC BY 4.0 per the Austrade site disclaimer. The redistributed copy states no licence of its own, so the data is **downloaded at run time and never committed**. Archive pinned by sha256 | MIT, part of this repo |
 
-The two synthetic configs share the same signal and the same total noise per series. In
-`correlated`, 70% of the noise variance comes from shocks shared by a region or a store; in
-`independent`, none does. They differ in error correlation and nothing else, which is the condition
-MinT is supposed to exploit. **Synthetic results are labelled synthetic wherever they appear.**
+The two synthetic configs share the same signal and, per series, the same noise variance and
+persistence (every noise component is AR(1) with coefficient 0.6). In `correlated`, 70% of the noise
+variance comes from shocks shared by a region or a store; in `independent`, none does. So they
+differ in cross-series error correlation only, which is the condition MinT is supposed to exploit.
+(The first version had white idiosyncratic noise, which made the arms differ in persistence too; a
+review caught it and Amendment A1 fixed it before any result was read.) **Synthetic results are labelled synthetic wherever they appear.**
 
 ## 3. Architecture
 
@@ -63,7 +65,7 @@ flowchart LR
 
 | Decision | Chose | Over | Why |
 |---|---|---|---|
-| Reconciliation code | Own `G`-matrix linear algebra (~150 lines) | `hierarchicalforecast` at run time | The methods are the subject of the study, so they are written out and tested; the library is kept as a test-only cross-check (all five agree, MinT to 4e-9) |
+| Reconciliation code | Own `G`-matrix linear algebra (~150 lines) | `hierarchicalforecast` at run time | The methods are the subject of the study, so they are written out and tested; the library is kept as a test-only cross-check (all five agree to 1e-6 in the tests; MinT to 4e-9 in practice) |
 | H1's candidate | MinT-shrink, fixed in advance | "Best of the five reconcilers" (the approved brief) | Choosing the best on the same origins the interval is computed on biases the test towards success. Logged as a deviation in `PREREGISTRATION.md` §7 |
 | Error metric | MASE per level, RMSSE as a check | MAPE, or one pooled number | Tourism regions have zero months, which breaks MAPE; aggregates are orders of magnitude larger than leaves, so a pooled score is just the total's score |
 | Bootstrap unit | Whole series (all origins together) | Each (series, origin) pair | Origins 3 months apart with a 12-month horizon overlap, so their errors are not independent. The total level has one series and falls back to pairs, labelled as such |

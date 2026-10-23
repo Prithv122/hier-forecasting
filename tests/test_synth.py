@@ -99,6 +99,21 @@ def test_noise_has_same_total_sd_but_different_correlation() -> None:
     assert c_reg > i_reg + 0.3
 
 
+def test_noise_persistence_is_the_same_in_both_configs() -> None:
+    """Amendment A1: only cross-series correlation differs, not each series' autocorrelation."""
+    cfgs = [dataclasses.replace(c, n_periods=1200) for c in (CORR, INDEP)]
+    log_signal = _log_matrix(generate(dataclasses.replace(cfgs[0], noise_sd=0.0), SEED)[0])
+    lag1 = {}
+    for cfg in cfgs:
+        noise = _log_matrix(generate(cfg, SEED)[0]) - log_signal
+        centred = noise - noise.mean(axis=1, keepdims=True)
+        lag1[cfg.name] = np.mean(
+            (centred[:, 1:] * centred[:, :-1]).sum(axis=1) / (centred**2).sum(axis=1)
+        )
+    assert lag1["correlated"] == pytest.approx(CORR.shock_ar, abs=0.05)
+    assert lag1["independent"] == pytest.approx(INDEP.shock_ar, abs=0.05)
+
+
 def test_shares_must_be_valid() -> None:
     with pytest.raises(ValueError, match="share"):
         generate(dataclasses.replace(CORR, region_share=0.8, store_share=0.5), SEED)
