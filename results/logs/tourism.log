@@ -1,0 +1,16 @@
+loading tourism
+111 nodes, 228 months
+origin 1/12 (2013-03) done
+origin 2/12 (2013-06) done
+origin 3/12 (2013-09) done
+origin 4/12 (2013-12) done
+origin 5/12 (2014-03) done
+origin 6/12 (2014-06) done
+origin 7/12 (2014-09) done
+origin 8/12 (2014-12) done
+origin 9/12 (2015-03) done
+origin 10/12 (2015-06) done
+origin 11/12 (2015-09) done
+origin 12/12 (2015-12) done
+wrote scores.csv, forecasts.csv.gz, meta.json to results\tourism
+exit 0

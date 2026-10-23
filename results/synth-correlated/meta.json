@@ -1,0 +1,175 @@
+{
+  "dataset": "synth-correlated",
+  "data": {
+    "dataset": "synth-correlated",
+    "sha256": "847ab60f9b67be8eb8f4c183c01d5d108bf9094a05941442c7f85a8a8424574d",
+    "n_series": 86,
+    "n_bottom": 60,
+    "n_periods": 144,
+    "first_ds": "2012-01-01",
+    "last_ds": "2023-12-01",
+    "levels": [
+      "total",
+      "region",
+      "store",
+      "category"
+    ],
+    "synthetic": true,
+    "config": "correlated",
+    "seed": 31
+  },
+  "h": 12,
+  "n_origins": 12,
+  "forecasters": [
+    "snaive",
+    "ets",
+    "lgbm",
+    "hybrid"
+  ],
+  "reconcilers": [
+    "base",
+    "bu",
+    "td",
+    "ols",
+    "wls_struct",
+    "mint_shrink"
+  ],
+  "excluded": {
+    "total": 0,
+    "by_level": {
+      "total": 0,
+      "region": 0,
+      "store": 0,
+      "category": 0
+    }
+  },
+  "diagnostics": {
+    "origins": [
+      "2020-03-01",
+      "2020-06-01",
+      "2020-09-01",
+      "2020-12-01",
+      "2021-03-01",
+      "2021-06-01",
+      "2021-09-01",
+      "2021-12-01",
+      "2022-03-01",
+      "2022-06-01",
+      "2022-09-01",
+      "2022-12-01"
+    ],
+    "negative_forecasts": {
+      "snaive": {
+        "base": 0,
+        "bu": 0,
+        "td": 0,
+        "ols": 0,
+        "wls_struct": 0,
+        "mint_shrink": 0
+      },
+      "ets": {
+        "base": 0,
+        "bu": 0,
+        "td": 0,
+        "ols": 0,
+        "wls_struct": 0,
+        "mint_shrink": 0
+      },
+      "lgbm": {
+        "base": 0,
+        "bu": 0,
+        "td": 0,
+        "ols": 0,
+        "wls_struct": 0,
+        "mint_shrink": 0
+      },
+      "hybrid": {
+        "base": 0,
+        "bu": 0,
+        "td": 0,
+        "ols": 0,
+        "wls_struct": 0,
+        "mint_shrink": 0
+      }
+    },
+    "coherence_max_error": {
+      "snaive": {
+        "base": 0.0,
+        "bu": 0.0,
+        "td": 0.0,
+        "ols": 0.0,
+        "wls_struct": 0.0,
+        "mint_shrink": 0.0
+      },
+      "ets": {
+        "base": 0.0,
+        "bu": 0.0,
+        "td": 0.0,
+        "ols": 0.0,
+        "wls_struct": 0.0,
+        "mint_shrink": 0.0
+      },
+      "lgbm": {
+        "base": 0.0,
+        "bu": 0.0,
+        "td": 0.0,
+        "ols": 0.0,
+        "wls_struct": 0.0,
+        "mint_shrink": 0.0
+      },
+      "hybrid": {
+        "base": 0.0,
+        "bu": 0.0,
+        "td": 0.0,
+        "ols": 0.0,
+        "wls_struct": 0.0,
+        "mint_shrink": 0.0
+      }
+    },
+    "wall_seconds": {
+      "snaive": 0.7562673999345861,
+      "ets": 366.605002300028,
+      "lgbm": 240.57505949996994,
+      "hybrid": 959.480206200009
+    },
+    "ets_fallback_series": {
+      "snaive": 0,
+      "ets": 0,
+      "lgbm": 0,
+      "hybrid": 0
+    }
+  },
+  "versions": {
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "statsforecast": "2.0.1",
+    "lightgbm": "4.7.0"
+  },
+  "git_commit": "3739dad3fcca09ee3124362a9911e92c57997948",
+  "git_dirty": false,
+  "spec": {
+    "H": 12,
+    "SEASON": 12,
+    "N_ORIGINS": 12,
+    "ORIGIN_STEP": 3,
+    "BOOTSTRAP_B": 2000,
+    "BOOTSTRAP_SEED": 20261023,
+    "ALPHA": 0.05,
+    "SYNTH_SEED": 31,
+    "MODEL_SEED": 7,
+    "FORECASTERS": [
+      "snaive",
+      "ets",
+      "lgbm",
+      "hybrid"
+    ],
+    "RECONCILERS": [
+      "base",
+      "bu",
+      "td",
+      "ols",
+      "wls_struct",
+      "mint_shrink"
+    ]
+  }
+}

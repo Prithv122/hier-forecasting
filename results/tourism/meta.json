@@ -1,0 +1,173 @@
+{
+  "dataset": "tourism",
+  "data": {
+    "dataset": "tourism",
+    "sha256": "6512d9aa80f111ee26480bc6f3f4eb3b5655d4ceecc384933100edc85adf704b",
+    "n_series": 111,
+    "n_bottom": 76,
+    "n_periods": 228,
+    "first_ds": "1998-01-01",
+    "last_ds": "2016-12-01",
+    "levels": [
+      "total",
+      "state",
+      "zone",
+      "region"
+    ],
+    "synthetic": false
+  },
+  "h": 12,
+  "n_origins": 12,
+  "forecasters": [
+    "snaive",
+    "ets",
+    "lgbm",
+    "hybrid"
+  ],
+  "reconcilers": [
+    "base",
+    "bu",
+    "td",
+    "ols",
+    "wls_struct",
+    "mint_shrink"
+  ],
+  "excluded": {
+    "total": 0,
+    "by_level": {
+      "total": 0,
+      "state": 0,
+      "zone": 0,
+      "region": 0
+    }
+  },
+  "diagnostics": {
+    "origins": [
+      "2013-03-01",
+      "2013-06-01",
+      "2013-09-01",
+      "2013-12-01",
+      "2014-03-01",
+      "2014-06-01",
+      "2014-09-01",
+      "2014-12-01",
+      "2015-03-01",
+      "2015-06-01",
+      "2015-09-01",
+      "2015-12-01"
+    ],
+    "negative_forecasts": {
+      "snaive": {
+        "base": 0,
+        "bu": 0,
+        "td": 0,
+        "ols": 0,
+        "wls_struct": 13,
+        "mint_shrink": 10
+      },
+      "ets": {
+        "base": 1,
+        "bu": 1,
+        "td": 0,
+        "ols": 9,
+        "wls_struct": 5,
+        "mint_shrink": 2
+      },
+      "lgbm": {
+        "base": 0,
+        "bu": 0,
+        "td": 0,
+        "ols": 10,
+        "wls_struct": 0,
+        "mint_shrink": 0
+      },
+      "hybrid": {
+        "base": 6,
+        "bu": 6,
+        "td": 0,
+        "ols": 10,
+        "wls_struct": 5,
+        "mint_shrink": 6
+      }
+    },
+    "coherence_max_error": {
+      "snaive": {
+        "base": 0.0,
+        "bu": 0.0,
+        "td": 0.0,
+        "ols": 0.0,
+        "wls_struct": 0.0,
+        "mint_shrink": 0.0
+      },
+      "ets": {
+        "base": 0.0,
+        "bu": 0.0,
+        "td": 0.0,
+        "ols": 0.0,
+        "wls_struct": 0.0,
+        "mint_shrink": 0.0
+      },
+      "lgbm": {
+        "base": 0.0,
+        "bu": 0.0,
+        "td": 0.0,
+        "ols": 0.0,
+        "wls_struct": 0.0,
+        "mint_shrink": 0.0
+      },
+      "hybrid": {
+        "base": 0.0,
+        "bu": 0.0,
+        "td": 0.0,
+        "ols": 0.0,
+        "wls_struct": 0.0,
+        "mint_shrink": 0.0
+      }
+    },
+    "wall_seconds": {
+      "snaive": 3.9182283999980427,
+      "ets": 1187.254179600015,
+      "lgbm": 579.6554232999333,
+      "hybrid": 2169.7366107999696
+    },
+    "ets_fallback_series": {
+      "snaive": 0,
+      "ets": 0,
+      "lgbm": 0,
+      "hybrid": 0
+    }
+  },
+  "versions": {
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "statsforecast": "2.0.1",
+    "lightgbm": "4.7.0"
+  },
+  "git_commit": "3739dad3fcca09ee3124362a9911e92c57997948",
+  "git_dirty": false,
+  "spec": {
+    "H": 12,
+    "SEASON": 12,
+    "N_ORIGINS": 12,
+    "ORIGIN_STEP": 3,
+    "BOOTSTRAP_B": 2000,
+    "BOOTSTRAP_SEED": 20261023,
+    "ALPHA": 0.05,
+    "SYNTH_SEED": 31,
+    "MODEL_SEED": 7,
+    "FORECASTERS": [
+      "snaive",
+      "ets",
+      "lgbm",
+      "hybrid"
+    ],
+    "RECONCILERS": [
+      "base",
+      "bu",
+      "td",
+      "ols",
+      "wls_struct",
+      "mint_shrink"
+    ]
+  }
+}
