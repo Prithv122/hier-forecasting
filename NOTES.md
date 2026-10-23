@@ -66,6 +66,11 @@ install, on Windows 11 / Python 3.12.13 / uv 0.11.19 (the hosted runner is ubunt
 | Test | `uv run pytest --cov=src --cov-report=term-missing` (+ `--basetemp` in a scratch dir, Windows only) | 141 passed, coverage 94% |
 | Smoke (extra) | `uv run hier-forecast backtest --smoke` | 3 origins, wrote scores/meta |
 
+**Reproduction from the clean clone:** `hier-forecast download` (sha256 matched), then
+`hier-forecast backtest --dataset tourism`: the 31,968-row `scores.csv` is identical to the committed
+one (max |ΔMASE| = 0.0). `hier-forecast report` on the committed scores gives a `REPORT.md` with an
+empty `git diff` (only line endings differ on Windows).
+
 Differences from the hosted runner: OS (Windows vs Ubuntu) and the `--basetemp` flag. Attribution
 grep over all commit messages: 0 matches; every commit authored "Prithvi M".
 
