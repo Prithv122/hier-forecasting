@@ -1,4 +1,4 @@
-"""Placeholder so CI is green from the first commit. Replace with real tests."""
+"""The package imports and exposes a version string."""
 
 
 def test_imports() -> None:

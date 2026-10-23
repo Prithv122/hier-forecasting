@@ -18,7 +18,7 @@ from hierfc import spec
 from hierfc.contracts import DS, ID, Hierarchy, Y, to_matrix
 
 MIN_TRAIN = 36  # months of history required at the earliest origin
-COHERENCE_TOL = 1e-6  # max |y~ - S y~_bottom| relative to max |y~|
+COHERENCE_TOL = 1e-8  # max |y~ - S y~_bottom| relative to max |y~|
 FORECAST_COLUMNS = ["origin", "forecaster", "reconciler", ID, DS, "step", "yhat"]
 
 MakeForecaster = Callable[[str], Any]

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from hierfc.backtest import make_origins, run_backtest
+from hierfc.backtest import COHERENCE_TOL, make_origins, run_backtest
 from hierfc.contracts import Hierarchy, to_matrix
 
 H = 6
@@ -83,6 +83,10 @@ def fake_reconcile(base, hierarchy, method, *, residuals=None, history=None):
     if method == "broken":
         out = base.copy()
         out[0] += 1.0
+        return out
+    if method == "slightly_broken":  # relative violation of 1e-7: between 1e-8 and the old 1e-6
+        out = hierarchy.S @ base[-hierarchy.n_bottom :]
+        out[0] += 1e-7 * np.abs(out).max()
         return out
     raise AssertionError(method)
 
@@ -200,6 +204,13 @@ def test_forecaster_never_sees_rows_after_the_origin():
 def test_incoherent_reconciler_raises():
     with pytest.raises(ValueError, match="not coherent"):
         run(make_y(), reconcilers=("base", "broken"))
+
+
+def test_coherence_tolerance_is_the_preregistered_one():
+    """PREREGISTRATION section 8: relative tolerance 1e-8, so a 1e-7 violation must raise."""
+    assert COHERENCE_TOL == 1e-8
+    with pytest.raises(ValueError, match="not coherent"):
+        run(make_y(), reconcilers=("base", "slightly_broken"))
 
 
 def test_base_is_not_checked_for_coherence():
